@@ -1,0 +1,49 @@
+name: Split
+
+# Publie php/, symfony/ et laravel/ vers leurs depots en lecture seule (lus par Packagist).
+# Secret requis : SPLIT_TOKEN, jeton GitHub fine-grained avec "Contents: Read and write"
+# sur les trois depots cibles. Les depots cibles doivent exister (vides) sous le meme proprietaire.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+concurrency:
+  group: split-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  split:
+    name: ${{ matrix.package.repo }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - { directory: php, repo: it-tools-php }
+          - { directory: symfony, repo: it-tools-symfony-bundle }
+          - { directory: laravel, repo: it-tools-laravel }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Decouper le sous-dossier
+        id: split
+        run: echo "sha=$(git subtree split --prefix='${{ matrix.package.directory }}')" >> "$GITHUB_OUTPUT"
+
+      - name: Pousser vers le depot cible
+        env:
+          SPLIT_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+          TARGET: ${{ github.repository_owner }}/${{ matrix.package.repo }}
+          SHA: ${{ steps.split.outputs.sha }}
+        run: |
+          test -n "$SPLIT_TOKEN" || { echo "Secret SPLIT_TOKEN absent."; exit 1; }
+          test -n "$SHA" || { echo "Decoupage vide."; exit 1; }
+          remote="https://x-access-token:${SPLIT_TOKEN}@github.com/${TARGET}.git"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            git push "$remote" "${SHA}:refs/tags/${GITHUB_REF_NAME}"
+          else
+            git push "$remote" "${SHA}:refs/heads/main"
+          fi

@@ -1,0 +1,43 @@
+{
+  "name": "@plateformweb/it-tools",
+  "version": "1.0.0",
+  "description": "SDK JavaScript / TypeScript pour l'API IT-Tools : outils PDF, CERFA, conversion de documents, QR codes et outils developpeur. Sans dependance, base sur fetch.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.17"
+  },
+  "keywords": [
+    "it-tools",
+    "api",
+    "sdk",
+    "pdf",
+    "cerfa",
+    "qrcode",
+    "developer-tools"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test \"tests/*.test.mjs\"",
+    "test:live": "npm run build && node --test \"tests/live/*.test.mjs\"",
+    "prepublishOnly": "npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}
