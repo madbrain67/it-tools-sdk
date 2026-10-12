@@ -28,6 +28,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Sans cela, checkout enregistre le GITHUB_TOKEN du workflow dans la config git : il prend le pas
+          # sur SPLIT_TOKEN et le push vers un autre depot est refuse (403 github-actions[bot]).
+          persist-credentials: false
 
       - name: Decouper le sous-dossier
         id: split

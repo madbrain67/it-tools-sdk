@@ -85,7 +85,15 @@ test('une panne reseau devient une TransportError', async () => {
 });
 
 test('le delai maximal interrompt la requete', async () => {
-  const slow = (url, init) => new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(init.signal.reason)));
+  // Le minuteur d'AbortSignal.timeout ne maintient pas la boucle d'evenements en vie (Node 22+) : un vrai socket le fait, ce faux fetch doit le faire aussi.
+  const slow = (url, init) =>
+    new Promise((_, reject) => {
+      const keepAlive = setTimeout(() => {}, 5_000);
+      init.signal.addEventListener('abort', () => {
+        clearTimeout(keepAlive);
+        reject(init.signal.reason);
+      });
+    });
   await assert.rejects(make(slow, { timeoutMs: 30 }).dev.uuid(), TransportError);
 });
 

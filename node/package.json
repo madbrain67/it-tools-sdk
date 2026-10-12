@@ -32,8 +32,8 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test \"tests/*.test.mjs\"",
-    "test:live": "npm run build && node --test \"tests/live/*.test.mjs\"",
+    "test": "npm run build && node scripts/test.mjs tests",
+    "test:live": "npm run build && node scripts/test.mjs tests/live",
     "prepublishOnly": "npm test"
   },
   "devDependencies": {
